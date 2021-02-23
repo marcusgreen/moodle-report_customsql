@@ -21,9 +21,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import CodeMirror from 'report_customsql/codemirror/lib/codemirror';
-import showhint from 'report_customsql/codemirror/addon/hint/show-hint';
-import hint from 'report_customsql/codemirror/addon/hint/sql-hint';
-import mode from 'report_customsql/codemirror/mode/sql/sql';
+import  'report_customsql/codemirror/addon/hint/show-hint';
+import  'report_customsql/codemirror/addon/hint/sql-hint';
+import  'report_customsql/codemirror/mode/sql/sql';
 
 export const init = () => {
     var tablejson = document.getElementById('tablejson');
