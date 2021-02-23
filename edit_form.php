@@ -35,9 +35,19 @@ require_once(dirname(__FILE__) . '/locallib.php');
  */
 class report_customsql_edit_form extends moodleform {
     public function definition() {
-        global $CFG;
+        global $CFG, $DB, $PAGE;
 
         $mform = $this->_form;
+
+        $PAGE->requires->js_call_amd('report_customsql/editor', 'init');
+        $tablearray = $DB->get_tables();
+        $tableobject  = new stdClass();
+        foreach ($tablearray as $table) {
+            $tableobject->$table = array_keys($DB->get_columns($table));
+        }
+        $tablejson = json_encode($tableobject);
+        $mform->addElement('hidden', 'tablejson', $tablejson, ['id' => 'tablejson']);
+        $mform->setType('tablejson', PARAM_RAW);
 
         $categoryoptions = report_customsql_category_options();
         $mform->addElement('select', 'categoryid', get_string('category', 'report_customsql'),
