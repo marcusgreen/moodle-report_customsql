@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<libraries>
+  <library>
+    <location>amd/src/codemirror/lib</location>
+    <name>codemirror</name>
+    <license>MIT</license>
+    <version>5.49.2</version>
+    <licenseversion></licenseversion>
+  </library>
+    <library>
+    <location>amd/src/codemirror/mode/sql/sql.js</location>
+    <name>codemirror sql mode</name>
+    <license>MIT</license>
+    <version>5.49.2</version>
+    <licenseversion></licenseversion>
+  </library>
+    <library>
+    <location>amd/src/codemirror/addon/hint/show-hint.js</location>
+    <name>codemirror show hint</name>
+    <license>MIT</license>
+    <version>5.49.2</version>
+    <licenseversion></licenseversion>
+  </library>
+      <library>
+    <location>amd/src/codemirror/addon/hint/sql-hint.js</location>
+    <name>codemirror show hint</name>
+    <license>MIT</license>
+    <version>5.49.2</version>
+    <licenseversion></licenseversion>
+  </library>
+
+</libraries>

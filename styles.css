@@ -34,6 +34,7 @@
 
 #page-admin-report-customsql-edit #id_querysql {
     min-width: 100%;
+    font-size: 18pt;
     font-family: "SF Mono", "Monaco", "Andale Mono", Consolas, "Lucida Console", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
 }
 

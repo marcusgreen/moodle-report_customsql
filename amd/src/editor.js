@@ -40,5 +40,5 @@ export const init = () => {
             tables: AUTOCOMPLETE_TABLES,
             disableKeywords: true
         });
-    }
+    };
 };
