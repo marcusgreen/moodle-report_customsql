@@ -32,6 +32,7 @@ export const init = () => {
         mode: 'text/x-mysql',
         styleActiveLine: true,
         lineNumbers: true,
+        screenReaderLabel: 'sql_query',
         extraKeys: { "Ctrl-Space": "autocomplete" }
     });
     editor.setSize('100%', 400);

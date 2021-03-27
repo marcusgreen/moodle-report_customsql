@@ -69,7 +69,7 @@ Feature: Ad-hoc database queries report
     And I press "Add a new category"
     Then I should see "Category 1"
 
-  @javascript
+  @javascript @adhoc_custom_category
   Scenario: Create an Ad-hoc database query in a custom category
     Given the custom sql report category "Special reports" exists:
     When I log in as "admin"
@@ -80,7 +80,7 @@ Feature: Ad-hoc database queries report
     And I set the following fields to these values:
       | Category    | Special reports                               |
       | Query name  | Test query                                    |
-      | Query SQL   | SELECT * FROM {config} WHERE name = 'version' |
+      | sql_query   | SELECT * FROM {config} WHERE name = 'version' |
     And I press "Save changes"
     And I follow "Ad-hoc database queries"
     And I follow "Special reports"
