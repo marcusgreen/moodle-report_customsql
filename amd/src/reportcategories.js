@@ -34,7 +34,7 @@ define(['jquery'], function($) {
          * Initialise the tabs.
          */
         init: function() {
-            $('body').on('click', '.csql_category h2', t.expandCollapse);
+            $('body').on('click', '.csql_category h2 .categoryname, .csql_category h2 .reportcounts', t.expandCollapse);
             $('.csql_expandcollapseall').on('click', t.expandCollapseAll);
             t.updateExpandCollapseAll();
         },
@@ -60,7 +60,7 @@ define(['jquery'], function($) {
         /**
          * Event handler for expanding or collapsing one section.
          *
-         * @param {Event} DOM event.
+         * @param {Event} e DOM event.
          */
         expandCollapseAll: function(e) {
             if ($('.csql_categoryshown').length === 0) {

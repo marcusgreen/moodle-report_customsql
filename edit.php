@@ -28,9 +28,14 @@ require_once(dirname(__FILE__) . '/edit_form.php');
 require_once($CFG->libdir . '/adminlib.php');
 
 $id = optional_param('id', 0, PARAM_INT);
+$categoryid = optional_param('categoryid', 0, PARAM_INT);
+$returnurl = optional_param('returnurl', '', PARAM_LOCALURL);
 $urlparams = [];
 if ($id) {
     $urlparams['id'] = $id;
+}
+if ($categoryid) {
+    $urlparams['categoryid'] = $categoryid;
 }
 
 admin_externalpage_setup('report_customsql', '', $urlparams, '/report/customsql/edit.php');
@@ -40,6 +45,12 @@ require_capability('report/customsql:definequeries', $context);
 $relativeurl = 'edit.php';
 $report = null;
 $reportquerysql = '';
+$params = [];
+
+if (!empty($returnurl)) {
+    $returnurl = new moodle_url($returnurl);
+    $params['returnurl'] = $returnurl->out_as_local_url(false);
+}
 
 // Are we editing an existing report, or creating a new one.
 if ($id) {
@@ -52,23 +63,39 @@ if ($id) {
     foreach ($queryparams as $param => $value) {
         $report->{'queryparam'.$param} = $value;
     }
-    $relativeurl .= '?id=' . $id;
+    $params['id'] = $id;
+    $category = $DB->get_record('report_customsql_categories', ['id' => $report->categoryid], '*', MUST_EXIST);
+    $PAGE->navbar->add(format_string($category->name), report_customsql_url('category.php', ['id' => $category->id]));
+    $PAGE->navbar->add(format_string($report->displayname));
+} else {
+    // If we add new query in a category, add a breadcrumb for it.
+    if ($categoryid) {
+        $category = $DB->get_record('report_customsql_categories', ['id' => $categoryid], '*', MUST_EXIST);
+        $PAGE->navbar->add(format_string($category->name), report_customsql_url('category.php', ['id' => $category->id]));
+    }
+    $PAGE->navbar->add(get_string('addreport', 'report_customsql'));
 }
 
 $querysql = optional_param('querysql', $reportquerysql, PARAM_RAW);
 $queryparams = report_customsql_get_query_placeholders_and_field_names($querysql);
+$customdata = ['queryparams' => $queryparams, 'forcecategoryid' => $categoryid];
 
-$mform = new report_customsql_edit_form(report_customsql_url($relativeurl), $queryparams);
+$mform = new report_customsql_edit_form(report_customsql_url($relativeurl, $params), $customdata);
 
 if ($mform->is_cancelled()) {
-    redirect(report_customsql_url('index.php'));
+    if ($returnurl) {
+        redirect($returnurl);
+    } else {
+        redirect(report_customsql_url('index.php'));
+    }
 }
 
 if ($newreport = $mform->get_data()) {
     $newreport->descriptionformat = $newreport->description['format'];
     $newreport->description = $newreport->description['text'];
 
-    $newreport->emailto = implode(',', $newreport->emailto);
+    // Currently, autocomplete can return an empty value in the array. If we get one, strip it out.
+    $newreport->emailto = trim(implode(',', $newreport->emailto), ',');
 
     // Set the following fields to empty strings if the report is running manually.
     if ($newreport->runable === 'manual') {
@@ -92,8 +119,13 @@ if ($newreport = $mform->get_data()) {
         $newreport->queryparams = '';
     }
 
+    $newreport->usermodified = $USER->id;
+    $newreport->timemodified = \report_customsql\utils::time();
     if ($id) {
         $newreport->id = $id;
+        if (empty($report->timemodified)) {
+            $newreport->timecreated = $newreport->timemodified;
+        }
         $ok = $DB->update_record('report_customsql_queries', $newreport);
         if (!$ok) {
             print_error('errorupdatingreport', 'report_customsql',
@@ -101,6 +133,7 @@ if ($newreport = $mform->get_data()) {
         }
 
     } else {
+        $newreport->timecreated = $newreport->timemodified;
         $id = $DB->insert_record('report_customsql_queries', $newreport);
         if (!$id) {
             print_error('errorinsertingreport', 'report_customsql',
@@ -111,14 +144,21 @@ if ($newreport = $mform->get_data()) {
     report_customsql_log_edit($id);
     if ($newreport->runable == 'manual') {
         redirect(report_customsql_url('view.php?id=' . $id));
+    } else if ($returnurl) {
+        redirect($returnurl);
     } else {
         redirect(report_customsql_url('index.php'));
     }
 }
 
 admin_externalpage_setup('report_customsql');
-echo $OUTPUT->header().
-     $OUTPUT->heading(get_string('editingareport', 'report_customsql'));
+echo $OUTPUT->header();
+
+if ($id) {
+    echo $OUTPUT->heading(get_string('editingareport', 'report_customsql'));
+} else {
+    echo $OUTPUT->heading(get_string('addingareport', 'report_customsql'));
+}
 
 if ($report) {
     $report->description = array('text' => $report->description, 'format' => $report->descriptionformat);

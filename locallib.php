@@ -245,9 +245,15 @@ function report_customsql_substitute_user_token($sql, $userid) {
     return str_replace('%%USERID%%', $userid, $sql);
 }
 
-function report_customsql_url($relativeurl) {
-    global $CFG;
-    return $CFG->wwwroot.'/report/customsql/'.$relativeurl;
+/**
+ * Create url to $relativeurl.
+ *
+ * @param string $relativeurl Relative url.
+ * @param array $params Parameter for url.
+ * @return moodle_url the relative url.
+ */
+function report_customsql_url($relativeurl, $params = []) {
+    return new moodle_url('/report/customsql/' . $relativeurl, $params);
 }
 
 function report_customsql_capability_options() {
@@ -486,6 +492,28 @@ function report_customsql_write_csv_row($handle, $data) {
     fwrite($handle, implode(',', $escapeddata)."\r\n");
 }
 
+/**
+ * Read the next row of data from a CSV file.
+ *
+ * Wrapper around fgetcsv to eliminate the non-standard escaping behaviour.
+ *
+ * @param resource $handle pointer to the file to read.
+ * @return array|false|null next row of data (as for fgetcsv).
+ */
+function report_customsql_read_csv_row($handle) {
+    static $disablestupidphpescaping = null;
+    if ($disablestupidphpescaping === null) {
+        // One-time init, can be removed once we only need to support PHP 7.4+.
+        $disablestupidphpescaping = '';
+        if (!check_php_version('7.4')) {
+            // This argument of fgetcsv cannot be unset in PHP < 7.4, so substitute a character which is unlikely to ever appear.
+            $disablestupidphpescaping = "\v";
+        }
+    }
+
+    return fgetcsv($handle, 0, ',', '"', $disablestupidphpescaping);
+}
+
 function report_customsql_start_csv($handle, $firstrow, $report) {
     $colnames = report_customsql_pretify_column_names($firstrow, $report->querysql);
     if ($report->singlerow) {
@@ -597,7 +625,7 @@ function report_customsql_validate_users($userids, $capability) {
         // User does not have the chosen access level.
         $context = context_user::instance($user->id);
         $a->userid = $userid;
-        $a->name = fullname($user);
+        $a->name = s(fullname($user));
         if (!has_capability($capability, $context, $user)) {
             return get_string('userhasnothiscapability', 'report_customsql', $a);
         }
@@ -627,9 +655,9 @@ function report_customsql_get_message_no_data($report) {
 function report_customsql_get_message($report, $csvfilename) {
     $handle = fopen($csvfilename, 'r');
     $table = new html_table();
-    $table->head = fgetcsv($handle);
+    $table->head = report_customsql_read_csv_row($handle);
     $countrows = 0;
-    while ($row = fgetcsv($handle)) {
+    while ($row = report_customsql_read_csv_row($handle)) {
         $rowdata = array();
         foreach ($row as $value) {
             $rowdata[] = $value;

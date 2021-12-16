@@ -44,80 +44,16 @@ $context = context_system::instance();
 require_capability('report/customsql:view', $context);
 
 $categories = $DB->get_records('report_customsql_categories', null, 'name ASC');
+$queries = $DB->get_records('report_customsql_queries');
 $showcat = optional_param('showcat', 0, PARAM_INT);
 $hidecat = optional_param('hidecat', 0, PARAM_INT);
-if (!$showcat && count($categories) == 1) {
-    $showcat = reset($categories)->id;
-}
+$returnurl = report_customsql_url('index.php');
+
+$widget = new \report_customsql\output\index_page($categories, $queries, $context, $returnurl, $showcat, $hidecat);
+$output = $PAGE->get_renderer('report_customsql');
 
 echo $OUTPUT->header();
 
-$expandcollapsealllink = html_writer::link('#', get_string('expandall'), [
-        'class' => 'csql_expandcollapseall',
-        'data-expandalltext' => get_string('expandall'),
-        'data-collapsealltext' => get_string('collapseall')]);
-$expandcollapsealllink = html_writer::div($expandcollapsealllink, 'csql_expandcollapseallcontainer');
-echo $expandcollapsealllink;
-
-foreach ($categories as $category) {
-    // Are we showing this cat? Default is hidden.
-    $show = $category->id == $showcat && $category->id != $hidecat ? 'shown' : 'hidden';
-
-    echo html_writer::start_tag('div', array('class' => 'csql_category csql_category' . $show));
-    if ($category->id == $showcat) {
-        $params = array('hidecat' => $category->id);
-    } else {
-        $params = array('showcat' => $category->id);
-    }
-    $linkhref = new moodle_url('/report/customsql/index.php', $params);
-    $link = html_writer::link($linkhref, $category->name, array('class' => 'categoryname'));
-
-    $manualreports = report_customsql_get_reports_for($category->id, 'manual');
-    $dailyreports = report_customsql_get_reports_for($category->id, 'daily');
-    $weeklyreports = report_customsql_get_reports_for($category->id, 'weekly');
-    $monthlyreports = report_customsql_get_reports_for($category->id, 'monthly');
-
-    // Category content.
-    $cc = new stdClass();
-    $cc->manual = count($manualreports);
-    $cc->daily = count($dailyreports);
-    $cc->weekly = count($weeklyreports);
-    $cc->monthly = count($monthlyreports);
-    $reportcounts = get_string('categorycontent', 'report_customsql', $cc);
-
-    $reportcounts = html_writer::tag('span', $reportcounts, array('class' => 'reportcounts'));
-    echo $OUTPUT->heading($link . ' ' . $reportcounts);
-
-    echo html_writer::start_tag('div', array('class' => 'csql_category_reports'));
-    if (empty($manualreports) && empty($dailyreports) && empty($weeklyreports) && empty($monthlyreports)) {
-        echo $OUTPUT->heading(get_string('availablereports', 'report_customsql'), 3).
-        html_writer::tag('p', get_string('noreportsavailable', 'report_customsql'));
-    } else {
-        report_customsql_print_reports_for($manualreports, 'manual');
-        report_customsql_print_reports_for($dailyreports, 'daily');
-        report_customsql_print_reports_for($weeklyreports, 'weekly');
-        report_customsql_print_reports_for($monthlyreports, 'monthly');
-    }
-    echo html_writer::end_tag('div');
-    echo html_writer::end_tag('div');
-}
-
-if (count($categories) >= 5) {
-    // If there are many categores, show the link again.
-    echo $expandcollapsealllink;
-}
-
-if (has_capability('report/customsql:definequeries', $context)) {
-    echo $OUTPUT->single_button(report_customsql_url('edit.php'),
-            get_string('addreport', 'report_customsql'));
-}
-if (has_capability('report/customsql:managecategories', $context)) {
-    echo html_writer::empty_tag('br');
-    echo $OUTPUT->single_button(report_customsql_url('manage.php'),
-            get_string('managecategories', 'report_customsql'));
-}
-
-// Initialise the expand/collapse JavaScript.
-$PAGE->requires->js_call_amd('report_customsql/reportcategories', 'init');
+echo $output->render($widget);
 
 echo $OUTPUT->footer();
