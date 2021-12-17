@@ -269,6 +269,7 @@ function report_customsql_runable_options($type = null) {
         return array('manual' => get_string('manual', 'report_customsql'));
     }
     return array('manual' => get_string('manual', 'report_customsql'),
+                 'hourly' => get_string('automaticallyhourly', 'report_customsql'),
                  'daily' => get_string('automaticallydaily', 'report_customsql'),
                  'weekly' => get_string('automaticallyweekly', 'report_customsql'),
                  'monthly' => get_string('automaticallymonthly', 'report_customsql')
@@ -558,6 +559,14 @@ function report_customsql_get_week_starts($timenow) {
     );
 }
 
+function report_customsql_get_hourly_starts($timenow) {
+    $dateparts = getdate($timenow);
+    return array(
+        mktime($dateparts['hours'], 0, 0, $dateparts['mon'], $dateparts['mday'], $dateparts['year']),
+        mktime($dateparts['hours'] - 1, 0, 0, $dateparts['mon'], $dateparts['mday'], $dateparts['year']),
+    );
+}
+
 function report_customsql_get_month_starts($timenow) {
     $dateparts = getdate($timenow);
 
@@ -569,6 +578,8 @@ function report_customsql_get_month_starts($timenow) {
 
 function report_customsql_get_starts($report, $timenow) {
     switch ($report->runable) {
+        case 'hourly':
+            return  report_customsql_get_hourly_starts($timenow);
         case 'daily':
             return report_customsql_get_daily_time_starts($timenow, $report->at);
         case 'weekly':
