@@ -39,7 +39,8 @@ class report_customsql_edit_form extends moodleform {
 
         $mform = $this->_form;
         $customdata = $this->_customdata;
-
+        
+        $PAGE->requires->css('/report/customsql/amd/src/codemirror/lib/codemirror.css');
         $PAGE->requires->js_call_amd('report_customsql/editor', 'init');
         $tablearray = $DB->get_tables();
         $tableobject  = new stdClass();
