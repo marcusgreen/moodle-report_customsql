@@ -21,9 +21,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import CodeMirror from 'report_customsql/codemirror/lib/codemirror';
-import  'report_customsql/codemirror/addon/hint/show-hint';
-import  'report_customsql/codemirror/addon/hint/sql-hint';
-import  'report_customsql/codemirror/mode/sql/sql';
+import 'report_customsql/codemirror/addon/hint/show-hint';
+import 'report_customsql/codemirror/addon/hint/sql-hint';
+import 'report_customsql/codemirror/mode/sql/sql';
 
 export const init = () => {
     var tablejson = document.getElementById('tablejson');
@@ -33,10 +33,12 @@ export const init = () => {
         styleActiveLine: true,
         lineNumbers: true,
         screenReaderLabel: 'sql_query',
-        extraKeys: { "Ctrl-Space": "autocomplete" }
+        extraKeys: {
+            "Ctrl-Space": "autocomplete"
+        }
     });
     editor.setSize('100%', 400);
-    CodeMirror.commands.autocomplete = function (cm) {
+    CodeMirror.commands.autocomplete = function(cm) {
         CodeMirror.showHint(cm, CodeMirror.hint.sql, {
             tables: AUTOCOMPLETE_TABLES,
             disableKeywords: true

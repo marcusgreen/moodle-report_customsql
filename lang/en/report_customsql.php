@@ -165,6 +165,7 @@ $string['queryparams'] = 'Please enter default values for the query parameters.'
 $string['queryparamschanged'] = 'The placeholders in the query have changed.';
 $string['queryrundate'] = 'query run date';
 $string['querysql'] = 'Query SQL (Ctrl-Space for hints)';
+$string['querysql_help'] = 'Enter the SQL query to run. Add either prefix_ before the table name or surround table names with { and }.';
 $string['querysqlrequried'] = 'You must enter some SQL.';
 $string['recordcount'] = 'This report has {$a} rows.';
 $string['recordlimitreached'] = 'This query reached the limit of {$a} rows. Some rows may have been omitted from the end.';

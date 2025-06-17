@@ -39,7 +39,7 @@ class report_customsql_edit_form extends moodleform {
 
         $mform = $this->_form;
         $customdata = $this->_customdata;
-        
+
         $PAGE->requires->css('/report/customsql/amd/src/codemirror/lib/codemirror.css');
         $PAGE->requires->js_call_amd('report_customsql/editor', 'init');
         $tablearray = $DB->get_tables();
@@ -76,6 +76,7 @@ class report_customsql_edit_form extends moodleform {
         $mform->addRule('querysql', get_string('querysqlrequried', 'report_customsql'),
                 'required', null, 'client');
         $mform->setType('querysql', PARAM_RAW);
+        $mform->addHelpButton('querysql', 'querysql', 'report_customsql');
 
         $mform->addElement('submit', 'verify', get_string('verifyqueryandupdate', 'report_customsql'));
         $mform->registerNoSubmitButton('verify');
